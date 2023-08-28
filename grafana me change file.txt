@@ -1,0 +1,6 @@
+*****grafana login page se "Welcome To Grafana" ko remove krna*****
+
+cd /usr/share/grafana/public/build/
+vim 8224.b92602c725f297431921.js
+^^ change in file 
+ssytemctl restart grafana-server.service

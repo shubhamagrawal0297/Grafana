@@ -1,0 +1,53 @@
+mosquitto installation on ubuntu
+---------------------------------------------------------------------------------
+1. sudo add-apt-repository ppa:mosquitto-dev/mosquitto-ppa
+2. sudo apt install mosquitto mosquitto-clients
+3. mosquitto -v
+4. ss -tulpn
+5. systemctl status mosquitto
+6. cd /etc/mosquitto/
+7. ls
+   ca_certificates  certs  conf.d  mosquitto.conf  passwd  passwd.tmp
+8. vi mosquitto.conf
+  ^^ include_dir /etc/mosquitto/conf.d
+
+     password_file /etc/mosquitto/passwd
+
+     allow_anonymous false
+9.  mosquitto_passwd -c /etc/mosquitto/passwd shubham
+    password...
+    repassword...
+10.  mosquitto_passwd -c /etc/mosquitto/passwd shubham
+    password..
+    repassword....
+11. cat password
+12. rm -rf passwd
+ -------if we have create user then it show an error like 
+     mosquitto_passwd /etc/mosquitto/passwd shubham
+   Error: Unable to open password file /etc/mosquitto/passwd. No such file or directory.
+
+13. 
+ ui: {
+          path: "ui"
+        },
+       adminAuth: {
+          type: "credentials",
+
+           users: [{
+                  username: "admin1",
+                  password: "$2a$08$zZWtXTja0fB1pzD4sHCMyOCMYz2Z6dNbM6tl8sJogENOMcxWV9DN.",  //password
+
+                  permissions: "*"
+
+         }]
+                  },
+
+
+admin1
+password :- $2b$08$JCwCTKdYhHJsvFEAdqLeWe29l685efJdTmXYgQtDapTV4q0O5SBgm
+
+admin2
+password :- $2b$08$q9nYrTdGkNp68PmKKw31NehJYmBXAnuqXJBhyL6T2f6CHPTpaFLFq
+
+admin4
+password :- $2b$08$LVrIlXrq./OZMXHU9Mh0YOS863o05a8KLtj5Q0DnpT3XPU7WmFDIq

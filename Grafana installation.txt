@@ -1,0 +1,147 @@
+-->> Grafana Installation <<--
+---------------------------------------------------------------------------------------
+
+1. sudo apt-get install -y adduser libfontconfig1 
+2. wget https://dl.grafana.com/enterprise/release/grafana-enterprise_9.4.7_amd64.deb
+3. sudo dpkg -i grafana-enterprise_9.4.7_amd64.deb
+4. systemctl enable --now grafana-server
+5. sudo vim /etc/grafana/grafana.ini 
+6. allow_embedding =true
+7. cd /etc/grafana/ 
+8. sudo wget https://dfos.co/sop_downloads/dfos.co_2023-ssl.zip 
+9. sudo apt install unzip 
+10. sudo unzip dfos.co_2023.zip 
+11. sudo rm -rf dfos.co_2023.zip
+12. sudo mv dfos.co_2022/STAR_dfos_co.crt /etc/grafana/ 
+13. sudo mv dfos.co_2022/STAR_dfos_co.ca-bundle /etc/grafana/ 
+14. sudo mv dfos.co_2022/custom.key /etc/grafana 
+15. sudo rm -rf dfos.co_2022
+16. sudo chown grafana:grafana /etc/grafana/custom.key
+17. sudo chmod 600 /etc/grafana/custom.key 
+18. sudo chown grafana:grafana /etc/grafana/STAR_dfos_co.crt 
+19. sudo chmod 600 /etc/grafana/STAR_dfos_co.crt 
+20. sudo chown grafana:grafana /etc/grafana/STAR_dfos_co.ca-bundle
+21. sudo chmod 644 /etc/grafana/STAR_dfos_co.ca-bundle
+22. sudo vim /etc/grafana/grafana.ini
+    ^^ [server] 
+
+http_addr = 
+
+http_port = 3000 
+
+domain = dfos.co 
+
+root_url = https://hulnesa.dfos.co:3000 
+
+cert_key = /etc/grafana/custom.key 
+
+cert_file = /etc/grafana/STAR_dfos_co.crt 
+
+enforce_domain = False 
+
+protocol = https 
+
+23. sudo systemctl restart grafana-server 
+24. grafana cli admin reset-admin-password [new-password]
+25. sudo systemctl restart grafana-server
+26. 
+
+
+
+
+
+promotheus installation on ubuntu
+----------->>>-------->>>>----------------
+1. sudo apt-get update 
+2. sudo groupadd --system prometheus
+3. sudo useradd -s /sbin/nologin --system -g prometheus prometheus
+4. sudo mkdir /etc/prometheus
+5. sudo mkdir /var/lib/prometheus
+6. wget https://github.com/prometheus/prometheus/releases/download/v2.43.0/prometheus-2.43.0.linux-amd64.tar.gz
+7. tar vxf prometheus*.tar.gz
+8. cd prometheus*/
+9. sudo mv prometheus /usr/local/bin
+10. sudo mv promtool /usr/local/bin
+11. sudo chown prometheus:prometheus /usr/local/bin/prometheus
+12. sudo chown prometheus:prometheus /usr/local/bin/promtool
+13. sudo mv consoles /etc/prometheus
+14. sudo mv console_libraries /etc/prometheus
+15. sudo mv prometheus.yml /etc/prometheus
+16. sudo chown prometheus:prometheus /etc/prometheus
+17. sudo chown -R prometheus:prometheus /etc/prometheus/consoles
+18. sudo chown -R prometheus:prometheus /etc/prometheus/console_libraries
+19. sudo chown -R prometheus:prometheus /var/lib/prometheus
+20. sudo nano /etc/prometheus/prometheus.yml
+21. sudo vim /etc/systemd/system/prometheus.service
+  ^^ [Unit]
+Description=Prometheus
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+ExecStart=/usr/local/bin/prometheus \
+    --config.file /etc/prometheus/prometheus.yml \
+    --storage.tsdb.path /var/lib/prometheus/ \
+    --web.console.templates=/etc/prometheus/consoles \
+    --web.console.libraries=/etc/prometheus/console_libraries
+
+[Install]
+WantedBy=multi-user.target
+
+22. sudo systemctl daemon-reload
+23. sudo systemctl enable prometheus
+24. sudo systemctl start prometheus
+25. sudo systemctl status prometheus
+26. sudo ufw allow 9090/tcp
+
+ With Prometheus running successfully, you can access it via your web browser using
+ localhost:9090 or <ip_address>:9090
+
+------<<<<---------->>>>-----------------------------------------------------------------
+****** ----->>>> Prometheus : Add Monitoring Target
+1. apt-get update -y
+2. wget https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz
+3. sudo groupadd -f node_exporter
+4. sudo useradd -g node_exporter --no-create-home --shell /bin/false node_exporter
+5. sudo mkdir /etc/node_exporter
+6. sudo chown node_exporter:node_exporter /etc/node_exporter
+7. tar -xvf node_exporter-1.0.1.linux-amd64.tar.gz
+8. mv node_exporter-1.0.1.linux-amd64 node_exporter-files
+9. sudo cp node_exporter-files/node_exporter /usr/bin/
+10. sudo chown node_exporter:node_exporter /usr/bin/node_exporter
+11. sudo vi /usr/lib/systemd/system/node_exporter.service
+12. sudo chmod 664 /usr/lib/systemd/system/node_exporter.service
+  ^^ [Unit]
+Description=Node Exporter
+Documentation=https://prometheus.io/docs/guides/node-exporter/
+Wants=network-online.target
+After=network-online.target
+
+ 
+
+[Service]
+User=node_exporter
+Group=node_exporter
+Type=simple
+Restart=on-failure
+ExecStart=/usr/bin/node_exporter \
+  --web.listen-address=:9200
+
+13. sudo systemctl daemon-reload
+14. sudo systemctl start node_exporter
+15. sudo systemctl status node_exporter
+16. sudo ufw allow 9200/tcp
+
+17. sudo vi /etc/prometheus/prometheus.yml
+    ^^ - job_name: 'nishant-rnd'  --->> instance ks hostname save kerege
+    scrape_interval: 5s
+    static_configs:
+    - targets: ['35.200.155.18:9200']
+
+if i want to check the configuration of vi /etc/prometheus/prometheus.yml
+18. promtool check-config /etc/prometheus/prometheus.yml
+19. sudo systemctl restart prometheus.service
+---->>>>  browser http://ip:3000
